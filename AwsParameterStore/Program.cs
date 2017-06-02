@@ -22,18 +22,18 @@ namespace AwsParameterStore
             List<String> parameterNames = new List<string>(new string[] { "hello" });
 
             // retrieve the parameter names and values in a dictionary
-            Dictionary<string, string> parameters = await GetParameters(parameterNames, RegionEndpoint.GetBySystemName("us-east-1"));
+            Dictionary<string, string> parameters = await GetParameters(parameterNames);
             foreach (var key in parameters.Keys)
             {
                 Console.WriteLine($"{key} {parameters[key]}");
             }
         }
 
-        static async Task<Dictionary<string, string>> GetParameters(List<string> parameterNames,  RegionEndpoint endpoint)
+        static async Task<Dictionary<string, string>> GetParameters(List<string> parameterNames)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             // get "default" profile or environment variables or fallback to EC2 ECS profile
-            AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient(endpoint);
+            AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient(new AmazonSimpleSystemsManagementConfig().RegionEndpoint);
 
             GetParametersRequest req = new GetParametersRequest();
             req.Names = parameterNames;
