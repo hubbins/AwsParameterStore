@@ -18,14 +18,18 @@ namespace AwsParameterStore
 
         static async Task Test()
         {
-            Dictionary<string, string> parameters = await GetParameters("soconnor", RegionEndpoint.USEast1);
+            // list the parameters to retrieve
+            List<String> parameterNames = new List<string>(new string[] { "hello" });
+
+            // retrieve the parameter names and values in a dictionary
+            Dictionary<string, string> parameters = await GetParameters(parameterNames, "soconnor", RegionEndpoint.USEast1);
             foreach (var key in parameters.Keys)
             {
                 Console.WriteLine($"{key} {parameters[key]}");
             }
         }
 
-        static async Task<Dictionary<string, string>> GetParameters(string profile, RegionEndpoint endpoint)
+        static async Task<Dictionary<string, string>> GetParameters(List<string> parameterNames,  string profile, RegionEndpoint endpoint)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             var chain = new CredentialProfileStoreChain();
@@ -35,7 +39,7 @@ namespace AwsParameterStore
                 AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient(awsCredentials, endpoint);
 
                 GetParametersRequest req = new GetParametersRequest();
-                req.Names = new List<string>(new string[] { "hello" });
+                req.Names = parameterNames;
                 req.WithDecryption = true;
 
                 GetParametersResponse resp = await client.GetParametersAsync(req);
