@@ -22,31 +22,28 @@ namespace AwsParameterStore
             List<String> parameterNames = new List<string>(new string[] { "hello" });
 
             // retrieve the parameter names and values in a dictionary
-            Dictionary<string, string> parameters = await GetParameters(parameterNames, "soconnor", RegionEndpoint.USEast1);
+            Dictionary<string, string> parameters = await GetParameters(parameterNames, RegionEndpoint.USEast1);
             foreach (var key in parameters.Keys)
             {
                 Console.WriteLine($"{key} {parameters[key]}");
             }
         }
 
-        static async Task<Dictionary<string, string>> GetParameters(List<string> parameterNames,  string profile, RegionEndpoint endpoint)
+        static async Task<Dictionary<string, string>> GetParameters(List<string> parameterNames,  RegionEndpoint endpoint)
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
-            var chain = new CredentialProfileStoreChain();
-            AWSCredentials awsCredentials;
-            if (chain.TryGetAWSCredentials(profile, out awsCredentials))
+            // get "default" profile or environment variables or fallback to EC2 ECS profile
+            AWSCredentials awsCredentials = FallbackCredentialsFactory.GetCredentials(false); 
+            AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient(awsCredentials, endpoint);
+
+            GetParametersRequest req = new GetParametersRequest();
+            req.Names = parameterNames;
+            req.WithDecryption = true;
+
+            GetParametersResponse resp = await client.GetParametersAsync(req);
+            foreach (var parameter in resp.Parameters)
             {
-                AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient(awsCredentials, endpoint);
-
-                GetParametersRequest req = new GetParametersRequest();
-                req.Names = parameterNames;
-                req.WithDecryption = true;
-
-                GetParametersResponse resp = await client.GetParametersAsync(req);
-                foreach (var parameter in resp.Parameters)
-                {
-                    parameters.Add(parameter.Name, parameter.Value);
-                }
+                parameters.Add(parameter.Name, parameter.Value);
             }
 
             return parameters;
