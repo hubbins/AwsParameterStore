@@ -33,7 +33,7 @@ namespace AwsParameterStore
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             // get "default" profile or environment variables or fallback to EC2 ECS profile
-            AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient(new AmazonSimpleSystemsManagementConfig().RegionEndpoint);
+            AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient();
 
             GetParametersRequest req = new GetParametersRequest();
             req.Names = parameterNames;
