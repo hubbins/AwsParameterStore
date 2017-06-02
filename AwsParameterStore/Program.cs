@@ -31,15 +31,14 @@ namespace AwsParameterStore
 
         static async Task<Dictionary<string, string>> GetParameters(List<string> parameterNames)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
             // get "default" profile or environment variables or fallback to EC2 ECS profile
-            AmazonSimpleSystemsManagementClient client = new AmazonSimpleSystemsManagementClient();
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
 
             GetParametersRequest req = new GetParametersRequest();
             req.Names = parameterNames;
             req.WithDecryption = true;
 
-            GetParametersResponse resp = await client.GetParametersAsync(req);
+            GetParametersResponse resp = await new AmazonSimpleSystemsManagementClient().GetParametersAsync(req);
             foreach (var parameter in resp.Parameters)
             {
                 parameters.Add(parameter.Name, parameter.Value);
